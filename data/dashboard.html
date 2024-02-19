@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<head>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.2/jquery.min.js" integrity="sha512-tWHlutFnuG0C6nQRlpvrEhE4QpkG1nn2MOUMWmUeRePl4e3Aki0VB6W1v3oLjFtd0hVOtRQ9PHpSfN6u6/QXkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <title>TempIOT</title>
+</head>
+
+<style>
+.switch.custom_switch label .lever {
+   background-color: #e0e0e0;
+}
+.switch.custom_switch label input[type=checkbox]:checked+.lever {
+   background-color: #f8bbd0;
+}
+.switch.custom_switch label input[type=checkbox]:checked+.lever:after {
+   background-color: #c2185b;
+}
+</style>
+
+<body class="grey lighten-5">
+    <nav>
+        <div class="nav-wrapper pink darken-2">
+          <a href="#" class="brand-logo"><b>Temp</b>IOT</a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="sass.html"><i class="material-icons left">bug_report</i>Bug Report</a></li>
+          </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col s6">
+                <div class="card grey lighten-4">
+                    <div class="card-content pink-text text-darken-2">
+                      <span class="card-title">Temperature: {{ temp }}C</span>
+                      <canvas id="tempChart" style="width:100%"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col s6">
+                <div class="card grey lighten-4">
+                    <div class="card-content pink-text text-darken-2">
+                      <span class="card-title">Humidity: {{ humi }}%</span>
+                      <canvas id="humiChart" style="width:100%"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col s6">
+                <div class="card grey lighten-4">
+                    <div class="card-content pink-text text-darken-2" style="min-height: 150px;">
+                      <span class="card-title">Display</span>
+                      <div class="switch custom_switch">
+                        <label>
+                          Off
+                          <input type="checkbox" {{ display_state }}>
+                          <span class="lever"></span>
+                          On
+                        </label>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col s6">
+                <div class="card grey lighten-4">
+                    <div class="card-content pink-text text-darken-2" style="min-height: 150px;">
+                        <span class="card-title">Data</span>
+                        <a class="pink darken-2 waves-effect waves-light btn"><i class="material-icons white-text right">update</i>Update</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const xValues = {{ x_values }};
+    const tempValues = {{ temp_values }};
+    const humiValues = {{ humi_values }};
+
+    new Chart("tempChart", {
+    type: "line",
+    data: {
+        labels: xValues,
+        datasets: [{
+            fill: false,
+            lineTension: 0.5,
+            backgroundColor: "#c2185b",
+            borderColor: "#f8bbd0",
+            data: tempValues
+        }]
+    },
+    options: {
+        legend: {display: false}
+    }
+    });
+
+    new Chart("humiChart", {
+    type: "line",
+    data: {
+        labels: xValues,
+        datasets: [{
+            fill: false,
+            lineTension: 0.5,
+            backgroundColor: "#c2185b",
+            borderColor: "#f8bbd0",
+            data: humiValues
+        }]
+    },
+    options: {
+        legend: {display: false}
+    }
+    });
+
+    $(".switch").find("input[type=checkbox]").on("change",function() {
+        var status = 0;
+        if ($(this).prop('checked')) {
+            status = 1;
+        }
+
+         $.ajax({
+            url : "http://{{ url }}/post",
+            type : "post",
+            data : { display : status}
+        })
+    });
+</script>
