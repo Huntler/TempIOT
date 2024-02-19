@@ -7,7 +7,7 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.2/jquery.min.js" integrity="sha512-tWHlutFnuG0C6nQRlpvrEhE4QpkG1nn2MOUMWmUeRePl4e3Aki0VB6W1v3oLjFtd0hVOtRQ9PHpSfN6u6/QXkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
     <title>TempIOT</title>
 </head>
@@ -22,6 +22,24 @@
 .switch.custom_switch label input[type=checkbox]:checked+.lever:after {
    background-color: #c2185b;
 }
+
+input[type=range]::-webkit-slider-thumb {
+    background-color: #c2185b;
+  }
+  input[type=range]::-moz-range-thumb {
+    background-color: #c2185b;
+  }
+  input[type=range]::-ms-thumb {
+    background-color: #c2185b;
+  }
+
+  /***** These are to edit the thumb and the text inside the thumb *****/
+  input[type=range] + .thumb {
+    background-color: #f8bbd0;
+  }
+  input[type=range] + .thumb.active .value {
+    color: #c2185b;
+  }
 </style>
 
 <body class="grey lighten-5">
@@ -29,14 +47,16 @@
         <div class="nav-wrapper pink darken-2">
           <a href="#" class="brand-logo"><b>Temp</b>IOT</a>
           <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="sass.html"><i class="material-icons left">bug_report</i>Bug Report</a></li>
+            <li><a href="https://github.com/Huntler/TempIOT/issues">
+                <i class="material-icons left">bug_report</i>Bug Report
+            </a></li>
           </ul>
         </div>
     </nav>
 
     <div class="container">
         <div class="row">
-            <div class="col s6">
+            <div class="col s12 m6">
                 <div class="card grey lighten-4">
                     <div class="card-content pink-text text-darken-2">
                       <span class="card-title">Temperature: {{ temp }}C</span>
@@ -44,7 +64,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col s6">
+            <div class="col s12 m6">
                 <div class="card grey lighten-4">
                     <div class="card-content pink-text text-darken-2">
                       <span class="card-title">Humidity: {{ humi }}%</span>
@@ -52,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col s6">
+            <div class="col s12 m6">
                 <div class="card grey lighten-4">
                     <div class="card-content pink-text text-darken-2" style="min-height: 150px;">
                       <span class="card-title">Display</span>
@@ -67,11 +87,47 @@
                     </div>
                 </div>
             </div>
-            <div class="col s6">
+            <div class="col s12 m6">
                 <div class="card grey lighten-4">
                     <div class="card-content pink-text text-darken-2" style="min-height: 150px;">
-                        <span class="card-title">Data</span>
-                        <a class="pink darken-2 waves-effect waves-light btn"><i class="material-icons white-text right">update</i>Update</a>
+                        <div class="col s12 m6">
+                            <span class="card-title">Data</span>
+                            <a class="pink darken-2 waves-effect waves-light btn"><i class="material-icons white-text right">update</i>Manual update</a>
+                        </div>
+                        <div class="input-field col s12 m6">
+                            <select id="webselect">
+                              <option value="1">1 second</option>
+                              <option value="10">10 seconds</option>
+                              <option value="30">30 seconds</option>
+                              <option value="60">1 minute</option>
+                              <option value="360">3 minutes</option>
+                              <option value="600">10 minutes</option>
+                            </select>
+                            <label>Website update frequency</label>
+                          </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6">
+                <div class="card grey lighten-4">
+                    <div class="card-content pink-text text-darken-2" style="min-height: 150px;">
+                      <span class="card-title">Frequency</span>
+                      <form action="#">
+                        <div class="row">
+                            <div class="col s9">
+                                <p class="range-field pink-text text-darken-2">
+                                  <input type="range" id="frequency" min="1" max="600" value="{{ frequency }}"/>
+                                </p>
+                            </div>
+                            <div class="col s3">
+                                <label for="frequency"><output id="frequency-value"></output>seconds</label>
+                            </div>
+                        </div>
+                        <button id="frequency-submit" class="btn waves-effect waves-light pink darken-2" disabled 
+                        type="submit" name="action" onclick="frequency_post">Submit
+                            <i class="material-icons right">check</i>
+                        </button>
+                      </form>
                     </div>
                 </div>
             </div>
@@ -80,6 +136,41 @@
 </body>
 
 <script>
+    // Sensor update frequency slider
+    $("#frequency-value").textContent = $("#frequency").value;
+    input.addEventListener("input", (event) => {
+        $("#frequency-value").textContent = event.target.value;
+        document.querySelector("#frequency-submit").disabled = false;
+    });
+
+    function frequency_post() {
+        $.ajax({
+            url : "http://{{ url }}/post/sensorfrequency",
+            type : "post",
+            data : { webfreq : $("#frequency").value}
+        })
+    }
+
+    // website update frequency
+    document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, options);
+    });
+
+    $(function() {
+        var temp="{{ web-frequency }}"; 
+        $("#webselect").val(temp);
+    });
+
+    $("#webselect").onchange = function(){
+        $.ajax({
+            url : "http://{{ url }}/post/webfrequency",
+            type : "post",
+            data : { webfreq : $("#webselect").value}
+        })
+    };
+
+    // graphs of sensor data
     const xValues = {{ x_values }};
     const tempValues = {{ temp_values }};
     const humiValues = {{ humi_values }};
@@ -118,6 +209,7 @@
     }
     });
 
+    // display on/off
     $(".switch").find("input[type=checkbox]").on("change",function() {
         var status = 0;
         if ($(this).prop('checked')) {
@@ -125,7 +217,7 @@
         }
 
          $.ajax({
-            url : "http://{{ url }}/post",
+            url : "http://{{ url }}/post/display",
             type : "post",
             data : { display : status}
         })
