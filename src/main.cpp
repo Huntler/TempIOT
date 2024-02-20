@@ -64,7 +64,6 @@ void setup() {
   server.on("/post/display", HTTP_POST, [] (AsyncWebServerRequest *request) {
     bool state = false;
     if (request->hasParam("display", true)) {
-      Serial.print(request->getParam("display", true)->value());
       state = request->getParam("display", true)->value() == "1";
     }
 
@@ -76,9 +75,18 @@ void setup() {
   });
 
   server.on("/post/sensorfrequency", HTTP_POST, [] (AsyncWebServerRequest *request) {
+    if (request->hasParam("sensorfreq", true)) {
+      int refreshRate = request->getParam("sensorfreq", true)->value().toInt();
+      Serial.println(refreshRate);
+      gui.setRefreshRate(refreshRate);
+    }
+
+    request->send(200, "text/plain", "ok");
   });
 
   server.on("/post/webfrequency", HTTP_POST, [] (AsyncWebServerRequest *request) {
+    // TODO
+    request->send(200, "text/plain", "ok");
   });  
   
   server.begin();
@@ -86,11 +94,13 @@ void setup() {
 
 void loop() {
   // Read from sensor
-  float temperature = dht.readTemperature();
-  float humidity = dht.readHumidity();
+  if (gui.readyForUpdate()) {
+    float temperature = dht.readTemperature();
+    float humidity = dht.readHumidity();
 
-  // Add to history
-  history.add(temperature, humidity);
+    // Add to history
+    history.add(temperature, humidity);
+  }
 
   // Display readings
   gui.clear();

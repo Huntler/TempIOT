@@ -60,12 +60,24 @@ void Gui::graph(History& history) {
     display.println(String(history.get_latest(HUMIDITY)) + "%");
 }
 
+bool Gui::readyForUpdate() const {
+    return next_update == 0;
+}
+
 bool Gui::state() const {
     return display_state;
 }
 
 void Gui::setState(bool state) {
     display_state = state;
+}
+
+int Gui::getRefreshRate() const {
+    return display_refresh;
+}
+
+void Gui::setRefreshRate(int refresh) {
+    display_refresh = refresh;
 }
 
 void Gui::clear() {
@@ -77,8 +89,12 @@ void Gui::refresh() {
         display.clearDisplay();
     }
 
-    display.display();
-    delay(display_refresh);
+    if (next_update++ >= display_refresh) {
+        display.display();
+        next_update = 0;
+    }
+
+    delay(1000);
 }
 
 void Gui::setup(String& hostname, String& password) {

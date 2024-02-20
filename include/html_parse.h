@@ -70,6 +70,11 @@ namespace web {
         strHtml.replace("{{ temp_values }}", tempValues.str().c_str());
         strHtml.replace("{{ humi_values }}", humiValues.str().c_str());
 
+        // GUI update frequency
+        // TODO
+        strHtml.replace("{{ web-frequency }}", "1");
+        strHtml.replace("{{ frequency }}", String(gui.getRefreshRate()));
+
         // Webaddress
         strHtml.replace("{{ url }}", WiFi.localIP().toString());
 

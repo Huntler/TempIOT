@@ -17,7 +17,8 @@
 class Gui {
     private:
         bool display_state = true;
-        uint display_refresh = 1000;
+        uint display_refresh = 5;
+        uint next_update = 0;
         Adafruit_SSD1306 display;
     
     public:
@@ -25,8 +26,13 @@ class Gui {
         void head(std::vector<String>& texts);
         void graph(History& history);
 
+        bool readyForUpdate() const;
+
         void clear();
         void refresh();
+        int getRefreshRate() const;
+        void setRefreshRate(int refresh);
+
         bool state() const;
         void setState(bool state);
 
