@@ -40,6 +40,10 @@ input[type=range]::-webkit-slider-thumb {
   input[type=range] + .thumb.active .value {
     color: #c2185b;
   }
+
+  ul.dropdown-content.select-dropdown li span {
+    color: #c2185b; /* no need for !important :) */
+}
 </style>
 
 <body class="grey lighten-5">
@@ -137,9 +141,9 @@ input[type=range]::-webkit-slider-thumb {
 
 <script>
     // Sensor update frequency slider
-    $("#frequency-value").textContent = $("#frequency").value;
-    $("#frequency").addEventListener("input", (event) => {
-        $("#frequency-value").textContent = event.target.value;
+    document.querySelector("#frequency-value").textContent = document.querySelector("#frequency").value;
+    document.querySelector("#frequency").addEventListener("input", (event) => {
+        document.querySelector("#frequency-value").textContent = event.target.value;
         document.querySelector("#frequency-submit").disabled = false;
     });
 
@@ -154,7 +158,7 @@ input[type=range]::-webkit-slider-thumb {
     // website update frequency
     document.addEventListener('DOMContentLoaded', function() {
         var elems = document.querySelectorAll('select');
-        var instances = M.FormSelect.init(elems, options);
+        var instances = M.FormSelect.init(elems);
     });
 
     $(function() {
@@ -162,7 +166,7 @@ input[type=range]::-webkit-slider-thumb {
         $("#webselect").val(temp);
     });
 
-    $("#webselect").onchange = function(){
+    document.querySelector("#webselect").onchange = function(){
         $.ajax({
             url : "http://{{ url }}/post/webfrequency",
             type : "post",

@@ -61,19 +61,25 @@ void setup() {
     request->send(200, "text/html", html);
   });
 
-  server.on("/post", HTTP_POST, [] (AsyncWebServerRequest *request) {
-      bool state = false;
-      if (request->hasParam("display", true)) {
-        Serial.print(request->getParam("display", true)->value());
-        state = request->getParam("display", true)->value() == "1";
-      }
+  server.on("/post/display", HTTP_POST, [] (AsyncWebServerRequest *request) {
+    bool state = false;
+    if (request->hasParam("display", true)) {
+      Serial.print(request->getParam("display", true)->value());
+      state = request->getParam("display", true)->value() == "1";
+    }
 
-      gui.setState(state);
+    gui.setState(state);
 
-      String html;
-      web::parseDashboard(history, gui, html);
-      request->send(200, "text/html", html);
-    });
+    String html;
+    web::parseDashboard(history, gui, html);
+    request->send(200, "text/html", html);
+  });
+
+  server.on("/post/sensorfrequency", HTTP_POST, [] (AsyncWebServerRequest *request) {
+  });
+
+  server.on("/post/webfrequency", HTTP_POST, [] (AsyncWebServerRequest *request) {
+  });  
   
   server.begin();
 }
